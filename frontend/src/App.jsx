@@ -104,14 +104,23 @@ function App() {
     formData.append('file', audioBlob, 'recording.wav');
 
     try {
-      // Assuming backend is running on localhost:8000
-      const response = await fetch('http://localhost:8000/analyze', {
+      // Use environment variable for backend URL, fallback to localhost
+      const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+      const response = await fetch(`${BACKEND_URL}/analyze`, {
         method: 'POST',
         body: formData,
       });
 
       if (!response.ok) {
-        throw new Error('Analysis failed');
+        let errorMessage = `Server responded with ${response.status}`;
+        try {
+            const errorData = await response.json();
+            if (errorData.error) errorMessage += `: ${errorData.error}`;
+            else if (errorData.detail) errorMessage += `: ${errorData.detail}`;
+        } catch (e) {
+            errorMessage += ` (${response.statusText})`;
+        }
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
@@ -120,7 +129,8 @@ function App() {
       setViewState('feedback');
     } catch (error) {
       console.error("Error analyzing audio:", error);
-      alert("Error processing audio. Ensure backend is running.\n\nBackend URL: http://localhost:8000/analyze");
+      const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+      alert(`Error processing audio:\n${error.message}\n\nBackend URL: ${BACKEND_URL}/analyze`);
       setViewState('question');
     } finally {
       setIsLoading(false);

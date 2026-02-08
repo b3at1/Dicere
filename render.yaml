@@ -1,0 +1,12 @@
+services:
+  # Backend Service
+  - type: web
+    name: dicere-backend
+    runtime: python
+    region: oregon
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: ASSEMBLYAI_API_KEY
+        sync: false
+    autoDeploy: true

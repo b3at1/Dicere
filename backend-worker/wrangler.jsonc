@@ -1,0 +1,22 @@
+{
+  "name": "dicere-backend",
+  "main": "src/index.ts",
+  "compatibility_date": "2024-02-08",
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "SESSION_STORAGE",
+        "class_name": "SessionStorage"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["SessionStorage"]
+    }
+  ],
+  "observability": {
+    "enabled": true
+  }
+}

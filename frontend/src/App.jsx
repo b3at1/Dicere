@@ -43,6 +43,7 @@ function App() {
   
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
+  const recordingTimeoutRef = useRef(null);
 
   const startAssessment = () => {
     // Select 4 random questions
@@ -68,6 +69,15 @@ function App() {
       mediaRecorderRef.current.onstop = handleStop;
       mediaRecorderRef.current.start();
       setIsRecording(true);
+
+      // Auto-stop after 1 minute
+      if (recordingTimeoutRef.current) clearTimeout(recordingTimeoutRef.current);
+      recordingTimeoutRef.current = setTimeout(() => {
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
+          stopRecording();
+          alert("Recording stopped automatically after 1 minute.");
+        }
+      }, 60000);
     } catch (err) {
       console.error("Error accessing microphone:", err);
       alert("Could not access microphone.");
@@ -75,7 +85,12 @@ function App() {
   };
 
   const stopRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
+    if (recordingTimeoutRef.current) {
+      clearTimeout(recordingTimeoutRef.current);
+      recordingTimeoutRef.current = null;
+    }
+
+    if (mediaRecorderRef.current && (isRecording || mediaRecorderRef.current.state === "recording")) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
       setViewState('analyzing');
